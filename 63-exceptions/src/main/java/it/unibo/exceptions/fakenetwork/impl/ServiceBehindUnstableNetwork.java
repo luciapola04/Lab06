@@ -1,5 +1,6 @@
 package it.unibo.exceptions.fakenetwork.impl;
 
+import it.unibo.exceptions.NetworkException;
 import it.unibo.exceptions.arithmetic.ArithmeticService;
 import it.unibo.exceptions.fakenetwork.api.NetworkComponent;
 
@@ -29,6 +30,10 @@ public final class ServiceBehindUnstableNetwork implements NetworkComponent {
         /*
          * The probability should be in [0, 1[!
          */
+        if(failProbability < 0 || failProbability >= 1) {
+            final String msg = "Error: The probability must be between 0 and 1(excluded)!";
+            throw new java.lang.IllegalArgumentException(msg);
+        }
         this.failProbability = failProbability;
         randomGenerator = new Random(randomSeed);
     }
@@ -51,12 +56,12 @@ public final class ServiceBehindUnstableNetwork implements NetworkComponent {
     public void sendData(final String data) throws IOException {
         accessTheNetwork(data);
         final var exceptionWhenParsedAsNumber = nullIfNumberOrException(data);
+
         if (KEYWORDS.contains(data) || exceptionWhenParsedAsNumber == null) {
             commandQueue.add(data);
         } else {
             final var message = data + " is not a valid keyword (allowed: " + KEYWORDS + "), nor is a number";
-            System.out.println(message);
-            commandQueue.clear();
+            throw new IllegalArgumentException(message);
             /*
              * This method, in this point, should throw an IllegalStateException.
              * Its cause, however, is the previous NumberFormatException.
@@ -79,7 +84,7 @@ public final class ServiceBehindUnstableNetwork implements NetworkComponent {
 
     private void accessTheNetwork(final String message) throws IOException {
         if (randomGenerator.nextDouble() < failProbability) {
-            throw new IOException("Generic I/O error");
+            throw new NetworkException("Generic I/O error");
         }
     }
 
