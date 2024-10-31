@@ -6,7 +6,6 @@ package it.unibo.collections.social;
 import it.unibo.collections.social.api.SocialNetworkUser;
 import it.unibo.collections.social.api.User;
 import it.unibo.collections.social.impl.SocialNetworkUserImpl;
-import it.unibo.collections.social.impl.UserImpl;
 
 import java.util.Collection;
 
