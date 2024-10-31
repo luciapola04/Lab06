@@ -6,11 +6,10 @@ package it.unibo.collections.social.impl;
 import it.unibo.collections.social.api.SocialNetworkUser;
 import it.unibo.collections.social.api.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +35,7 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * In order to save the people followed by a user organized in groups, adopt
      * a generic-type Map:  think of what type of keys and values would best suit the requirements
      */
-
+    final private Map<String, Set<U>> followers;
     /*
      * [CONSTRUCTORS]
      *
@@ -62,13 +61,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
+        this.followers = new HashMap<>();
     }
-
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
-
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        super(name, surname, user);
+        this.followers = new HashMap<>();
+    }
     /*
      * [METHODS]
      *
@@ -76,7 +78,21 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+        if(this.followers.containsKey(circle)) {
+            for(User u: this.followers.get(circle)) {
+                if(u == user) {
+                    System.out.println("The user " + user.getUsername() + "is already in the group!");
+                    return false;
+                } else {
+                    this.followers.get(circle).add(user);
+                    return true;
+                }
+            }
+        }
+        Set<U> userFollowers = new HashSet<U>();
+        userFollowers.add(user);
+        this.followers.put(circle, userFollowers);
+        return true;
     }
 
     /**
@@ -86,11 +102,19 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        List<U> listFollowers = new LinkedList<>();
+        if(this.followers.containsKey(groupName)) {
+            listFollowers.addAll(this.followers.get(groupName));
+        }
+        return listFollowers;
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        List<U> allFollowers = new LinkedList<U>();
+        for(String group: this.followers.keySet()) {
+            allFollowers.addAll(this.followers.get(group));
+        } 
+        return allFollowers;
     }
 }
